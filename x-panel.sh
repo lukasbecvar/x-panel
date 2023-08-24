@@ -17,6 +17,7 @@ echo "\033[33m\033[1m#\033[1m \033[31mServices\033[0m                           
 echo "\033[33m\033[1m#\033[1m  \033[34m1 - Start all\033[1m        \033[34m2 - Stop all\033[0m            \033[33m\033[1m#\033[0m"
 echo "\033[33m\033[1m#\033[1m  \033[34m3 - Start Apache\033[1m     \033[34m4 - Stop Apache\033[0m         \033[33m\033[1m#\033[0m"
 echo "\033[33m\033[1m#\033[1m  \033[34m5 - Start mysql\033[1m      \033[34m6 - Stop mysql\033[0m          \033[33m\033[1m#\033[0m"
+echo "\033[33m\033[1m#\033[1m  \033[34m0 - Show status                              \033[33m\033[1m#\033[0m"
 echo "\033[33m\033[1m#\033[0m                                               \033[33m\033[1m#\033[0m"
 echo "\033[33m\033[1m#\033[1m \033[31mSystem\033[0m                	                \033[33m\033[1m#\033[0m"
 echo "\033[33m\033[1m#\033[1m  \033[34mA - System update\033[1m    \033[34mB - System clean\033[0m        \033[33m\033[1m#\033[0m"
@@ -30,6 +31,9 @@ read num
 
 # select num
 case $num in
+	0)
+		green_echo "status"
+    ;;
 	1)
 		green_echo "start all"
 	;;
