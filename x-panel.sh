@@ -205,8 +205,12 @@ echo "\033[33m\033[1m╠══════════════════�
 echo "\033[33m\033[1m║\033[1m  \033[34m0 - Exit panel\033[0m                                   \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╚═══════════════════════════════════════════════════╝\033[0m"
 
-# stuck menu for select action
-read num
+# read select number
+if [ "$#" -eq 0 ]; then
+    read num
+else
+    num=$1
+fi
 
 # select num
 case $num in
