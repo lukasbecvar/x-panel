@@ -31,7 +31,7 @@ stop_mysql() {
 	sudo systemctl stop mysql
 	if $normal_mode
 	then
-		sudo systemctl status mysql | head -n 3	
+		sudo systemctl status mysql | head -n 3
 	fi
 	red_echo "[X-PANEL]: mysql stoped"
 }
@@ -40,7 +40,7 @@ start_apache() {
 	sudo systemctl start apache2
 	if $normal_mode
 	then
-		sudo systemctl status apache2 | head -n 3	
+		sudo systemctl status apache2 | head -n 3
 	fi
 	green_echo "[X-PANEL]: apache2 started"
 }
@@ -49,7 +49,7 @@ stop_apache() {
 	sudo systemctl stop apache2
 	if $normal_mode
 	then
-		sudo systemctl status apache2 | head -n 3	
+		sudo systemctl status apache2 | head -n 3
 	fi
 	red_echo "[X-PANEL]: apache2 stoped"
 }
@@ -58,7 +58,7 @@ start_minecraft() {
 	sudo systemctl start minecraft
 	if $normal_mode
 	then
-		sudo systemctl status minecraft | head -n 3	
+		sudo systemctl status minecraft | head -n 3
 	fi
 	green_echo "[X-PANEL]: minecraft started"
 }
@@ -67,7 +67,7 @@ stop_minecraft() {
 	sudo systemctl stop minecraft
 	if $normal_mode
 	then
-		sudo systemctl status minecraft | head -n 3	
+		sudo systemctl status minecraft | head -n 3
 	fi
 	red_echo "[X-PANEL]: minecraft stoped"
 }
@@ -100,7 +100,7 @@ system_backup() {
 	# stop all services
 	stop_mysql
 	stop_apache
-	#stop_minecraft
+	stop_minecraft
 
 	# delete old backup
 	if [ -f "$services_path/vps-backup.tar.gz" ]
@@ -171,7 +171,7 @@ system_backup() {
 	# start all services after backup
 	start_mysql
 	start_apache
-	#start_minecraft
+	start_minecraft
 
 	# print final msg
 	green_echo "[X-PANEL]: backup is completed in $services_path/vps-backup.tar.gz"
@@ -207,9 +207,9 @@ echo "\033[33m\033[1m╚══════════════════�
 
 # read select number
 if [ "$#" -eq 0 ]; then
-    read num
+	read num
 else
-    num=$1
+	num=$1
 fi
 
 # select num
