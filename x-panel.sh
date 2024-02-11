@@ -171,7 +171,7 @@ system_backup() {
 	# start all services after backup
 	start_mysql
 	start_apache
-	start_minecraft
+	#start_minecraft
 
 	# print final msg
 	green_echo "[X-PANEL]: backup is completed in $services_path/vps-backup.tar.gz"
