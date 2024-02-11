@@ -143,6 +143,11 @@ system_backup() {
 	# backup others configs
 	cp -R /home/$used_username/.bashrc $services_path/dumps/config-files
 
+	# backup logs
+	green_echo "[X-PANEL]: dumping logs..."
+	mkdir $services_path/dumps/logs/
+	sudo cp -R /var/log/* $services_path/dumps/logs/
+
 	# backup databases ###########################################################################
 	start_mysql
 	green_echo "[X-PANEL]: dumping database..."
