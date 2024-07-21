@@ -4,10 +4,10 @@
 clear
 
 # color codes.
+cecho () { echo "\033[36m\033[1m$1\033[0m"; }
+red_echo () { echo "\033[31m\033[1m$1\033[0m"; }
 green_echo () { echo "\033[32m\033[1m$1\033[0m"; }
 yellow_echo () { echo "\033[33m\033[1m$1\033[0m"; }
-red_echo () { echo "\033[31m\033[1m$1\033[0m"; }
-cecho () { echo "\033[36m\033[1m$1\033[0m"; }
 
 # define services path
 services_path="/services"
@@ -54,28 +54,47 @@ stop_apache() {
 	red_echo "[X-PANEL]: apache2 stoped"
 }
 
-start_minecraft() {
-	sudo systemctl start minecraft
+start_openvpn() {
+	sudo systemctl start openvpn
 	if $normal_mode
 	then
-		sudo systemctl status minecraft | head -n 3
+		sudo systemctl status openvpn | head -n 3
 	fi
-	green_echo "[X-PANEL]: minecraft started"
+	green_echo "[X-PANEL]: openvpn started"
 }
 
-stop_minecraft() {
-	sudo systemctl stop minecraft
+stop_openvpn() {
+	sudo systemctl stop openvpn
 	if $normal_mode
 	then
-		sudo systemctl status minecraft | head -n 3
+		sudo systemctl status openvpn | head -n 3
 	fi
-	red_echo "[X-PANEL]: minecraft stoped"
+	red_echo "[X-PANEL]: openvpn stoped"
+}
+
+start_monitoring() {
+	sudo systemctl start admin-suite-monitoring
+	if $normal_mode
+	then
+		sudo systemctl status admin-suite-monitoring | head -n 3
+	fi
+	green_echo "[X-PANEL]: monitoring started"
+}
+
+stop_monitoring() {
+	sudo systemctl stop admin-suite-monitoring
+	if $normal_mode
+	then
+		sudo systemctl status admin-suite-monitoring | head -n 3
+	fi
+	red_echo "[X-PANEL]: monitoring stoped"
 }
 
 show_status() {
 	sudo systemctl --no-pager status mysql | head -n 3
 	sudo systemctl --no-pager status apache2 | head -n 3
-	sudo systemctl --no-pager status minecraft | head -n 3
+	sudo systemctl --no-pager status openvpn | head -n 3
+	sudo systemctl --no-pager status admin-suite-monitoring | head -n 3
 }
 
 system_update() {
@@ -89,9 +108,20 @@ system_update() {
 system_clean() {
 	sudo find /var/log -type f -delete
 	sudo rm -r /tmp/*
+	sudo rm -r /root/.rpmdb
+	sudo rm -r /root/.wget-hsts
+	sudo rm -r /root/.mysql_history
+	sudo rm -r /root/.sudo_as_admin_successful
+	sudo rm -r /home/lordbecvold/.npm
+	sudo rm -r /home/lordbecvold/.cache
+	sudo rm -r /home/lordbecvold/.docker
+	sudo rm -r /home/lordbecvold/.lesshst
+	sudo rm -r /home/lordbecvold/.wget-hsts
+	sudo rm -r /home/lordbecvold/.mysql_history
+	sudo rm -r /home/lordbecvold/.python_history
+	sudo rm -r /home/lordbecvold/.sudo_as_admin_successful
 	ls -alF /tmp/
 	ls -alF /var/log/
-	sudo rm -r $services_path/minecraft/logs/*
 	green_echo "[X-PANEL]: system clean complete"
 }
 
@@ -100,7 +130,8 @@ system_backup() {
 	# stop all services
 	stop_mysql
 	stop_apache
-	stop_minecraft
+	stop_openvpn
+	stop_monitoring
 
 	# delete old backup
 	if [ -f "$services_path/vps-backup.tar.gz" ]
@@ -123,25 +154,18 @@ system_backup() {
 
 	# backup apache configs
 	mkdir $services_path/dumps/config-files/apache2
-	cp -R /etc/apache2/apache2.conf $services_path/dumps/config-files/apache2
-	cp -R /etc/apache2/sites-available/default.conf $services_path/dumps/config-files/apache2
-	cp -R /etc/apache2/sites-available/becvar.xyz.conf $services_path/dumps/config-files/apache2
+	sudo cp -R /etc/apache2 $services_path/dumps/config-files/apache2
 
 	# backup php config
 	mkdir $services_path/dumps/config-files/php
-	cp -R /etc/php/8.1/apache2/php.ini $services_path/dumps/config-files/php
+	sudo cp -R /etc/php $services_path/dumps/config-files/php
 
 	# backup mysql configs
 	mkdir $services_path/dumps/config-files/mysql
-	cp -R /etc/mysql/mysql.conf.d/mysqld.cnf $services_path/dumps/config-files/mysql
-	cp -R /etc/mysql/my.cnf $services_path/dumps/config-files/mysql
-
-	# backup systemd configs
-	mkdir $services_path/dumps/config-files/systemd
-	cp -R /etc/systemd/system/minecraft.service $services_path/dumps/config-files/systemd
+	sudo cp -R /etc/mysql $services_path/dumps/config-files/mysql
 
 	# backup others configs
-	cp -R /home/$used_username/.bashrc $services_path/dumps/config-files
+	sudo cp -R /home/$used_username/.bashrc $services_path/dumps/config-files
 
 	# backup logs
 	green_echo "[X-PANEL]: dumping logs..."
@@ -176,7 +200,8 @@ system_backup() {
 	# start all services after backup
 	start_mysql
 	start_apache
-	#start_minecraft
+	start_openvpn
+	start_monitoring
 
 	# print final msg
 	green_echo "[X-PANEL]: backup is completed in $services_path/vps-backup.tar.gz"
@@ -185,7 +210,6 @@ system_backup() {
 system_maintenance() {
 	normal_mode=false
 
-	# system_clean
 	system_update
 	system_backup
 	show_status
@@ -198,9 +222,10 @@ echo "\033[33m\033[1m╔══════════════════�
 echo "\033[33m\033[1m║\033[1m                   \033[32mSERVER PANEL\033[0m                    \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╠═══════════════════════════════════════════════════╣\033[0m"
 echo "\033[33m\033[1m║\033[1m \033[31mServices\033[0m                                          \033[33m\033[1m║\033[0m"
-echo "\033[33m\033[1m║\033[1m  \033[34m1  -  Start mysql\033[1m        \033[34m2  -  Stop mysql\033[0m        \033[33m\033[1m║\033[0m"
-echo "\033[33m\033[1m║\033[1m  \033[34m3  -  Start Apache\033[1m       \033[34m4  -  Stop Apache\033[0m       \033[33m\033[1m║\033[0m"
-echo "\033[33m\033[1m║\033[1m  \033[34m5  -  Start minecraft\033[1m    \033[34m6  -  Stop minecraft\033[0m    \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m  \033[34m1  -  Start MySQL\033[1m        \033[34m2  -  Stop MySQL\033[0m        \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m  \033[34m3  -  Start Apache2\033[1m      \033[34m4  -  Stop Apache2\033[0m      \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m  \033[34m5  -  Start OpenVPN\033[1m      \033[34m6  -  Stop OpenVPN\033[0m      \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m  \033[34m7  -  Start Monitoring\033[1m   \033[34m8  -  Stop Monitoring\033[0m   \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34m99 -  Show status                                \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╠═══════════════════════════════════════════════════╣\033[0m"
 echo "\033[33m\033[1m║\033[1m \033[31mSystem\033[0m                	                    \033[33m\033[1m║\033[0m"
@@ -232,10 +257,16 @@ case $num in
 		stop_apache
 	;;
 	5)
-		start_minecraft
+		start_openvpn
 	;;
 	6)
-		stop_minecraft
+		stop_openvpn
+	;;
+	7)
+		start_monitoring
+	;;
+	8)
+		stop_monitoring
 	;;
 	99)
 		show_status
