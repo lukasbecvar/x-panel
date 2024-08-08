@@ -91,6 +91,7 @@ stop_monitoring() {
 }
 
 show_status() {
+	sudo systemctl --no-pager status sshd | head -n 3
 	sudo systemctl --no-pager status mysql | head -n 3
 	sudo systemctl --no-pager status apache2 | head -n 3
 	sudo systemctl --no-pager status openvpn | head -n 3
