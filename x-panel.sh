@@ -1,93 +1,34 @@
 #!/bin/bash
 
-# clear console in script start
+# clear console after script start
 clear
 
-# color codes.
-cecho () { echo "\033[36m\033[1m$1\033[0m"; }
-red_echo () { echo "\033[31m\033[1m$1\033[0m"; }
-green_echo () { echo "\033[32m\033[1m$1\033[0m"; }
-yellow_echo () { echo "\033[33m\033[1m$1\033[0m"; }
+# color echo functions
+echo_red() { echo "\033[0;31m$1\033[0m"; }
+echo_yellow() { echo "\033[1;33m$1\033[0m"; }
+echo_blue() { echo "\033[0;34m$1\033[0m"; }
+echo_green() { echo "\033[0;32m$1\033[0m"; }
+echo_orange() { echo "\033[0;33m$1\033[0m"; }
+echo_cyan() { echo "\033[0;36m$1\033[0m"; }
 
-# define services path
+# X-PANEL VARIABLES ###########################################################
+# path to services directory
 services_path="/services"
 
-# systemd runner user
-used_username="lordbecvold"
-
-# normal mode (check if not maintenance)
-normal_mode=true
+# systemd user
+systemd_user="lordbecvold"
 ###############################################################################
-start_mysql() {
-	sudo systemctl start mysql
-	if $normal_mode
-	then
-		sudo systemctl status mysql | head -n 3
-	fi
-	green_echo "[X-PANEL]: mysql started"
+
+start_service() { 
+	sudo systemctl start $1
+	sudo systemctl status $1 | head -n 3
+	echo_green "[X-PANEL]: $1 started"
 }
 
-stop_mysql() {
-	sudo systemctl stop mysql
-	if $normal_mode
-	then
-		sudo systemctl status mysql | head -n 3
-	fi
-	red_echo "[X-PANEL]: mysql stoped"
-}
-
-start_apache() {
-	sudo systemctl start apache2
-	if $normal_mode
-	then
-		sudo systemctl status apache2 | head -n 3
-	fi
-	green_echo "[X-PANEL]: apache2 started"
-}
-
-stop_apache() {
-	sudo systemctl stop apache2
-	if $normal_mode
-	then
-		sudo systemctl status apache2 | head -n 3
-	fi
-	red_echo "[X-PANEL]: apache2 stoped"
-}
-
-start_openvpn() {
-	sudo systemctl start openvpn
-	if $normal_mode
-	then
-		sudo systemctl status openvpn | head -n 3
-	fi
-	green_echo "[X-PANEL]: openvpn started"
-}
-
-stop_openvpn() {
-	sudo systemctl stop openvpn
-	if $normal_mode
-	then
-		sudo systemctl status openvpn | head -n 3
-	fi
-	red_echo "[X-PANEL]: openvpn stoped"
-}
-
-start_monitoring() {
-	sudo systemctl start admin-suite-monitoring
-	if $normal_mode
-	then
-		sudo systemctl status admin-suite-monitoring | head -n 3
-	fi
-	green_echo "[X-PANEL]: monitoring started"
-}
-
-stop_monitoring() {
-	sudo systemctl stop admin-suite-monitoring
-	if $normal_mode
-	then
-		sudo systemctl status admin-suite-monitoring | head -n 3
-	fi
-	red_echo "[X-PANEL]: monitoring stoped"
+stop_service() { 
+	sudo systemctl stop $1
+	sudo systemctl status $1 | head -n 3
+	echo_red "[X-PANEL]: $1 stopped"
 }
 
 show_status() {
@@ -103,7 +44,7 @@ system_update() {
 	sudo apt update -y
 	sudo apt upgrade -y
 	sudo apt-get dist-upgrade -y
-	green_echo "[X-PANEL]: system update complete"
+	echo_green "[X-PANEL]: system update complete"
 }
 
 system_clean() {
@@ -123,33 +64,32 @@ system_clean() {
 	sudo rm -r /home/lordbecvold/.sudo_as_admin_successful
 	ls -alF /tmp/
 	ls -alF /var/log/
-	green_echo "[X-PANEL]: system clean complete"
+	echo_green "[X-PANEL]: system clean complete"
 }
 
 system_backup() {
-
 	# stop all services
-	stop_mysql
-	stop_apache
-	stop_openvpn
-	stop_monitoring
+	stop_service "mysql"
+	stop_service "apache2"
+	stop_service "openvpn"
+	stop_service "admin-suite-monitoring"
 
 	# delete old backup
 	if [ -f "$services_path/vps-backup.tar.gz" ]
 	then
 		sudo rm -rf $services_path/vps-backup.tar.gz
-		green_echo "[X-PANEL]: deleting old backup file..."
+		echo_green "[X-PANEL]: deleting old backup file..."
 	fi
 
 	# delete old dumps
 	if [ -d "$services_path/dumps" ]
 	then
 		sudo rm -rf $services_path/dumps/
-		green_echo "[X-PANEL]: deleting old dumps directory..."
+		echo_green "[X-PANEL]: deleting old dumps directory..."
 	fi
 
 	# backup configs #############################################################################
-	green_echo "[X-PANEL]: dumping configs..."
+	echo_green "[X-PANEL]: dumping configs..."
 	mkdir $services_path/dumps
 	mkdir $services_path/dumps/config-files
 
@@ -169,13 +109,13 @@ system_backup() {
 	sudo cp -R /home/$used_username/.bashrc $services_path/dumps/config-files
 
 	# backup logs
-	green_echo "[X-PANEL]: dumping logs..."
+	echo_green "[X-PANEL]: dumping logs..."
 	mkdir $services_path/dumps/logs/
 	sudo cp -R /var/log/* $services_path/dumps/logs/
 
 	# backup databases ###########################################################################
-	start_mysql
-	green_echo "[X-PANEL]: dumping database..."
+	start_service "mysql"
+	echo_green "[X-PANEL]: dumping database..."
 	mkdir $services_path/dumps/database
 
 	# dump datases
@@ -183,10 +123,10 @@ system_backup() {
 	mysqldump mysql > $services_path/dumps/database/mysql.sql
 
 	# stop mysql after database dump
-	stop_mysql
+	stop_service "mysql"
 
 	# backup services ############################################################################
-	green_echo "[X-PANEL]: creating services archive..."
+	echo_green "[X-PANEL]: creating services archive..."
 	sudo su -c "tar -cf - /services | pv -s $(sudo du -sb /services | awk '{print $1}') | gzip > /vps-backup.tar.gz" root
 	sudo mv /vps-backup.tar.gz $services_path/
 	sudo chown $used_username:$used_username $services_path/vps-backup.tar.gz
@@ -195,30 +135,27 @@ system_backup() {
 	if [ -d "$services_path/dumps" ]
 	then
 		sudo rm -rf $services_path/dumps/
-		green_echo "[X-PANEL]: deleting temporary dumps directory..."
+		echo_green "[X-PANEL]: deleting temporary dumps directory..."
 	fi
 
 	# start all services after backup
-	start_mysql
-	start_apache
-	start_openvpn
-	start_monitoring
+	start_service "mysql"
+	start_service "apache2"
+	start_service "openvpn"
+	start_service "admin-suite-monitoring"
 
 	# print final msg
-	green_echo "[X-PANEL]: backup is completed in $services_path/vps-backup.tar.gz"
+	echo_green "[X-PANEL]: backup is completed in $services_path/vps-backup.tar.gz"
 }
 
 system_maintenance() {
-	normal_mode=false
-
 	system_update
 	system_backup
 	show_status
-	green_echo "[X-PANEL]: system maintenance complete"
+	echo_green "[X-PANEL]: system maintenance complete"
 }
-###############################################################################
 
-# print panel menu
+# print panel menu selection
 echo "\033[33m\033[1m╔═══════════════════════════════════════════════════╗\033[0m"
 echo "\033[33m\033[1m║\033[1m                   \033[32mSERVER PANEL\033[0m                    \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╠═══════════════════════════════════════════════════╣\033[0m"
@@ -236,60 +173,58 @@ echo "\033[33m\033[1m╠══════════════════�
 echo "\033[33m\033[1m║\033[1m  \033[34m0 - Exit panel\033[0m                                   \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╚═══════════════════════════════════════════════════╝\033[0m"
 
-# read select number
+# read selection input
 if [ "$#" -eq 0 ]; then
 	read num
 else
 	num=$1
 fi
 
-# select num
+# selection cases
 case $num in
 	1)
-		start_mysql
+		start_service "mysql"
 	;;
 	2)
-		stop_mysql
+		stop_service "mysql"
 	;;
 	3)
-		start_apache
+		start_service "apache2"
 	;;
 	4)
-		stop_apache
+		stop_service "apache2"
 	;;
 	5)
-		start_openvpn
+		start_service "openvpn"
 	;;
 	6)
-		stop_openvpn
+		stop_service "openvpn"
 	;;
 	7)
-		start_monitoring
+		start_service "admin-suite-monitoring"
 	;;
 	8)
-		stop_monitoring
+		stop_service "admin-suite-monitoring"
 	;;
-	99)
+	99|status)
 		show_status
 	;;
-	a|A)
+	a|A|update)
 		system_update
 	;;
-	b|B)
+	b|B|clean)
 		system_clean
 	;;
-	c|C)
+	c|C|backup)
 		system_backup
 	;;
-	d|D)
+	d|D|maintenance)
 		system_maintenance
 	;;
-	# panel exit
 	0)
 		exit
 	;;
-	# not found num
 	*)
-		red_echo "$num: not found"
+		echo_red "option: $num not found"
 	;;
 esac
