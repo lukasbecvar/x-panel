@@ -14,9 +14,6 @@ echo_cyan() { echo "\033[0;36m$1\033[0m"; }
 # X-PANEL VARIABLES ###########################################################
 # path to services directory
 services_path="/services"
-
-# systemd user
-systemd_user="lukasbecvar"
 ###############################################################################
 
 start_service() { 
