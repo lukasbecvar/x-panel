@@ -16,7 +16,7 @@ echo_cyan() { echo "\033[0;36m$1\033[0m"; }
 services_path="/services"
 
 # systemd user
-systemd_user="lordbecvold"
+systemd_user="lukasbecvar"
 ###############################################################################
 
 start_service() { 
@@ -54,14 +54,14 @@ system_clean() {
 	sudo rm -r /root/.wget-hsts
 	sudo rm -r /root/.mysql_history
 	sudo rm -r /root/.sudo_as_admin_successful
-	sudo rm -r /home/lordbecvold/.npm
-	sudo rm -r /home/lordbecvold/.cache
-	sudo rm -r /home/lordbecvold/.docker
-	sudo rm -r /home/lordbecvold/.lesshst
-	sudo rm -r /home/lordbecvold/.wget-hsts
-	sudo rm -r /home/lordbecvold/.mysql_history
-	sudo rm -r /home/lordbecvold/.python_history
-	sudo rm -r /home/lordbecvold/.sudo_as_admin_successful
+	sudo rm -r /home/lukasbecvar/.npm
+	sudo rm -r /home/lukasbecvar/.cache
+	sudo rm -r /home/lukasbecvar/.docker
+	sudo rm -r /home/lukasbecvar/.lesshst
+	sudo rm -r /home/lukasbecvar/.wget-hsts
+	sudo rm -r /home/lukasbecvar/.mysql_history
+	sudo rm -r /home/lukasbecvar/.python_history
+	sudo rm -r /home/lukasbecvar/.sudo_as_admin_successful
 	ls -alF /tmp/
 	ls -alF /var/log/
 	echo_green "[X-PANEL]: system clean complete"
