@@ -2,4 +2,4 @@
 The bash script for automating various operations on my private server.
 
 ## License
-The framework is open-sourced software licensed under the [MIT license](https://github.com/lukasbecvar/x-panel/blob/main/LICENSE)
+The project is open-sourced software licensed under the [MIT license](https://github.com/lukasbecvar/x-panel/blob/main/LICENSE)
