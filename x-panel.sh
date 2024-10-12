@@ -14,15 +14,18 @@ echo_cyan() { echo "\033[0;36m$1\033[0m"; }
 # X-PANEL VARIABLES ###########################################################
 # path to services directory
 services_path="/services"
+
+# main admin username
+used_username="lukasbecvar"
 ###############################################################################
 
-start_service() { 
+start_service() {
 	sudo systemctl start $1
 	sudo systemctl status $1 | head -n 3
 	echo_green "[X-PANEL]: $1 started"
 }
 
-stop_service() { 
+stop_service() {
 	sudo systemctl stop $1
 	sudo systemctl status $1 | head -n 3
 	echo_red "[X-PANEL]: $1 stopped"
@@ -53,6 +56,7 @@ system_clean() {
 	sudo rm -r /root/.sudo_as_admin_successful
 	sudo rm -r /home/lukasbecvar/.npm
 	sudo rm -r /home/lukasbecvar/.cache
+	sudo rm -r /home/lukasbecvar/.rpmdb
 	sudo rm -r /home/lukasbecvar/.docker
 	sudo rm -r /home/lukasbecvar/.lesshst
 	sudo rm -r /home/lukasbecvar/.wget-hsts
@@ -104,6 +108,7 @@ system_backup() {
 
 	# backup others configs
 	sudo cp -R /home/$used_username/.bashrc $services_path/dumps/config-files
+	sudo cp -R /etc/systemd/system/admin-suite-monitoring.service $services_path/dumps/config-files
 
 	# backup logs
 	echo_green "[X-PANEL]: dumping logs..."
@@ -117,6 +122,8 @@ system_backup() {
 
 	# dump datases
 	mysqldump becvar_site > $services_path/dumps/database/becvar_site.sql
+	mysqldump becvar_site > $services_path/dumps/database/admin_suite.sql
+	mysqldump becvar_site > $services_path/dumps/database/code_paste.sql
 	mysqldump mysql > $services_path/dumps/database/mysql.sql
 
 	# stop mysql after database dump
