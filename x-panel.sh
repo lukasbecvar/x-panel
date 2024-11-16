@@ -3,7 +3,7 @@
 # clear console after script start
 clear
 
-# color echo functions
+# colored echo functions
 echo_red() { echo "\033[0;31m$1\033[0m"; }
 echo_yellow() { echo "\033[1;33m$1\033[0m"; }
 echo_blue() { echo "\033[0;34m$1\033[0m"; }
@@ -50,10 +50,12 @@ system_update() {
 system_clean() {
 	sudo find /var/log -type f -delete
 	sudo rm -r /tmp/*
+	sudo rm -r /root/.rnd
 	sudo rm -r /root/.rpmdb
 	sudo rm -r /root/.wget-hsts
 	sudo rm -r /root/.mysql_history
 	sudo rm -r /root/.sudo_as_admin_successful
+	sudo rm -r /home/lukasbecvar/.rnd
 	sudo rm -r /home/lukasbecvar/.npm
 	sudo rm -r /home/lukasbecvar/.cache
 	sudo rm -r /home/lukasbecvar/.rpmdb
@@ -89,12 +91,12 @@ system_backup() {
 		echo_green "[X-PANEL]: deleting old dumps directory..."
 	fi
 
-	# backup configs #############################################################################
+	# backup configs
 	echo_green "[X-PANEL]: dumping configs..."
 	mkdir $services_path/dumps
 	mkdir $services_path/dumps/config-files
 
-	# backup apache configs
+	# backup apache config
 	mkdir $services_path/dumps/config-files/apache2
 	sudo cp -R /etc/apache2 $services_path/dumps/config-files/apache2
 
@@ -102,7 +104,7 @@ system_backup() {
 	mkdir $services_path/dumps/config-files/php
 	sudo cp -R /etc/php $services_path/dumps/config-files/php
 
-	# backup mysql configs
+	# backup mysql config
 	mkdir $services_path/dumps/config-files/mysql
 	sudo cp -R /etc/mysql $services_path/dumps/config-files/mysql
 
@@ -115,27 +117,27 @@ system_backup() {
 	mkdir $services_path/dumps/logs/
 	sudo cp -R /var/log/* $services_path/dumps/logs/
 
-	# backup databases ###########################################################################
+	# backup databases
 	start_service "mysql"
 	echo_green "[X-PANEL]: dumping database..."
 	mkdir $services_path/dumps/database
 
-	# dump datases
+	# dump databases
 	mysqldump becvar_site > $services_path/dumps/database/becvar_site.sql
-	mysqldump becvar_site > $services_path/dumps/database/admin_suite.sql
-	mysqldump becvar_site > $services_path/dumps/database/code_paste.sql
+	mysqldump admin_suite > $services_path/dumps/database/admin_suite.sql
+	mysqldump code_paste > $services_path/dumps/database/code_paste.sql
 	mysqldump mysql > $services_path/dumps/database/mysql.sql
 
 	# stop mysql after database dump
 	stop_service "mysql"
 
-	# backup services ############################################################################
+	# backup services
 	echo_green "[X-PANEL]: creating services archive..."
 	sudo su -c "tar -cf - /services | pv -s $(sudo du -sb /services | awk '{print $1}') | gzip > /vps-backup.tar.gz" root
 	sudo mv /vps-backup.tar.gz $services_path/
 	sudo chown $used_username:$used_username $services_path/vps-backup.tar.gz
 
-	# delete temporary dumps #####################################################################
+	# delete temporary dumps
 	if [ -d "$services_path/dumps" ]
 	then
 		sudo rm -rf $services_path/dumps/
@@ -159,7 +161,7 @@ system_maintenance() {
 	echo_green "[X-PANEL]: system maintenance complete"
 }
 
-# print panel menu selection
+# print menu panel
 echo "\033[33m\033[1m╔═══════════════════════════════════════════════════╗\033[0m"
 echo "\033[33m\033[1m║\033[1m                   \033[32mSERVER PANEL\033[0m                    \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╠═══════════════════════════════════════════════════╣\033[0m"
