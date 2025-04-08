@@ -16,7 +16,7 @@ echo_cyan() { echo "\033[0;36m$1\033[0m"; }
 services_path="/services"
 
 # main admin username
-used_username="lukasbecvar"
+used_username="username"
 ###############################################################################
 
 start_service() {
@@ -36,6 +36,7 @@ show_status() {
 	sudo systemctl --no-pager status mysql | head -n 3
 	sudo systemctl --no-pager status apache2 | head -n 3
 	sudo systemctl --no-pager status openvpn | head -n 3
+	sudo systemctl --no-pager status minecraft | head -n 3
 	sudo systemctl --no-pager status admin-suite-monitoring | head -n 3
 }
 
@@ -55,16 +56,16 @@ system_clean() {
 	sudo rm -r /root/.wget-hsts
 	sudo rm -r /root/.mysql_history
 	sudo rm -r /root/.sudo_as_admin_successful
-	sudo rm -r /home/lukasbecvar/.rnd
-	sudo rm -r /home/lukasbecvar/.npm
-	sudo rm -r /home/lukasbecvar/.cache
-	sudo rm -r /home/lukasbecvar/.rpmdb
-	sudo rm -r /home/lukasbecvar/.docker
-	sudo rm -r /home/lukasbecvar/.lesshst
-	sudo rm -r /home/lukasbecvar/.wget-hsts
-	sudo rm -r /home/lukasbecvar/.mysql_history
-	sudo rm -r /home/lukasbecvar/.python_history
-	sudo rm -r /home/lukasbecvar/.sudo_as_admin_successful
+	sudo rm -r /home/username/.rnd
+	sudo rm -r /home/username/.npm
+	sudo rm -r /home/username/.cache
+	sudo rm -r /home/username/.rpmdb
+	sudo rm -r /home/username/.docker
+	sudo rm -r /home/username/.lesshst
+	sudo rm -r /home/username/.wget-hsts
+	sudo rm -r /home/username/.mysql_history
+	sudo rm -r /home/username/.python_history
+	sudo rm -r /home/username/.sudo_as_admin_successful
 	ls -alF /tmp/
 	ls -alF /var/log/
 	echo_green "[X-PANEL]: system clean complete"
@@ -75,6 +76,7 @@ system_backup() {
 	stop_service "mysql"
 	stop_service "apache2"
 	stop_service "openvpn"
+	stop_service "minecraft"
 	stop_service "admin-suite-monitoring"
 
 	# delete old backup
@@ -148,10 +150,12 @@ system_backup() {
 	start_service "mysql"
 	start_service "apache2"
 	start_service "openvpn"
+	start_service "minecraft"
 	start_service "admin-suite-monitoring"
 
 	# print final msg
 	echo_green "[X-PANEL]: backup is completed in $services_path/vps-backup.tar.gz"
+	php /services/website/admin-suite/bin/console app:notifications:send "[X-PANEL]: backup is completed in $services_path/vps-backup.tar.gz"
 }
 
 system_maintenance() {
@@ -169,10 +173,11 @@ echo "\033[33m\033[1m║\033[1m \033[31mServices\033[0m                         
 echo "\033[33m\033[1m║\033[1m  \033[34m1  -  Start MySQL\033[1m        \033[34m2  -  Stop MySQL\033[0m        \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34m3  -  Start Apache2\033[1m      \033[34m4  -  Stop Apache2\033[0m      \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34m5  -  Start OpenVPN\033[1m      \033[34m6  -  Stop OpenVPN\033[0m      \033[33m\033[1m║\033[0m"
-echo "\033[33m\033[1m║\033[1m  \033[34m7  -  Start Monitoring\033[1m   \033[34m8  -  Stop Monitoring\033[0m   \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m  \033[34m7  -  Start Minecraft\033[1m    \033[34m8  -  Stop Minecraft\033[0m    \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m  \033[34m9  -  Start Monitoring\033[1m   \033[34m10 -  Stop Monitoring\033[0m   \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34m99 -  Show status                                \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╠═══════════════════════════════════════════════════╣\033[0m"
-echo "\033[33m\033[1m║\033[1m \033[31mSystem\033[0m                	                    \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m \033[31mSystem\033[0m                                            \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34mA - System update\033[1m        \033[34mB - System clean\033[0m        \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34mC - System backup\033[1m        \033[34mD - System maintenance\033[0m  \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╠═══════════════════════════════════════════════════╣\033[0m"
@@ -207,9 +212,15 @@ case $num in
 		stop_service "openvpn"
 	;;
 	7)
-		start_service "admin-suite-monitoring"
+		start_service "minecraft"
 	;;
 	8)
+		stop_service "minecraft"
+	;;
+	9)
+		start_service "admin-suite-monitoring"
+	;;
+	10)
 		stop_service "admin-suite-monitoring"
 	;;
 	99|status)
