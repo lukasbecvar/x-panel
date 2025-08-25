@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # clear console after script start
 clear
@@ -36,7 +36,6 @@ show_status() {
 	sudo systemctl --no-pager status mysql | head -n 3
 	sudo systemctl --no-pager status apache2 | head -n 3
 	sudo systemctl --no-pager status openvpn | head -n 3
-	sudo systemctl --no-pager status minecraft | head -n 3
 	sudo systemctl --no-pager status admin-suite-monitoring | head -n 3
 }
 
@@ -76,7 +75,6 @@ system_backup() {
 	stop_service "mysql"
 	stop_service "apache2"
 	stop_service "openvpn"
-	stop_service "minecraft"
 	stop_service "admin-suite-monitoring"
 
 	# delete old backup
@@ -150,7 +148,6 @@ system_backup() {
 	start_service "mysql"
 	start_service "apache2"
 	start_service "openvpn"
-	start_service "minecraft"
 	start_service "admin-suite-monitoring"
 
 	# print final msg
@@ -173,8 +170,7 @@ echo "\033[33m\033[1m║\033[1m \033[31mServices\033[0m                         
 echo "\033[33m\033[1m║\033[1m  \033[34m1  -  Start MySQL\033[1m        \033[34m2  -  Stop MySQL\033[0m        \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34m3  -  Start Apache2\033[1m      \033[34m4  -  Stop Apache2\033[0m      \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34m5  -  Start OpenVPN\033[1m      \033[34m6  -  Stop OpenVPN\033[0m      \033[33m\033[1m║\033[0m"
-echo "\033[33m\033[1m║\033[1m  \033[34m7  -  Start Minecraft\033[1m    \033[34m8  -  Stop Minecraft\033[0m    \033[33m\033[1m║\033[0m"
-echo "\033[33m\033[1m║\033[1m  \033[34m9  -  Start Monitoring\033[1m   \033[34m10 -  Stop Monitoring\033[0m   \033[33m\033[1m║\033[0m"
+echo "\033[33m\033[1m║\033[1m  \033[34m7  -  Start Monitoring\033[1m   \033[34m8  -  Stop Monitoring\033[0m   \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m║\033[1m  \033[34m99 -  Show status                                \033[33m\033[1m║\033[0m"
 echo "\033[33m\033[1m╠═══════════════════════════════════════════════════╣\033[0m"
 echo "\033[33m\033[1m║\033[1m \033[31mSystem\033[0m                                            \033[33m\033[1m║\033[0m"
@@ -212,15 +208,9 @@ case $num in
 		stop_service "openvpn"
 	;;
 	7)
-		start_service "minecraft"
-	;;
-	8)
-		stop_service "minecraft"
-	;;
-	9)
 		start_service "admin-suite-monitoring"
 	;;
-	10)
+	8)
 		stop_service "admin-suite-monitoring"
 	;;
 	99|status)
